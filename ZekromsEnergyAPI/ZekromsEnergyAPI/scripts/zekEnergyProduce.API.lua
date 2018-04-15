@@ -6,7 +6,7 @@ function init()
 end
 
 function update(dt)
-	
+	power.update(dt)
 end
 
 --Call: `world.callScriptedEntity(entity.id(), "powerOp", <factor>)` when ready
