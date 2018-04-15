@@ -6,6 +6,7 @@ function power.init()
 		script.setUpdateDelta(50)
 		self.dt=50
 	end
+	--self.adjacent=config.getParameter("adjacent", false)
 	self.inputRate=config.getParameter("inputRate")
 	self.outputRate=config.getParameter("outputRate")
 	if storage.energy==nil then
@@ -36,6 +37,11 @@ function power.produce(amount, dt)
 end
 
 function power.transferEvalOut(dt)
+	--[[if self.adjacent then
+	world.entityQuery(object.position(), Radius)
+		object.boundBox()
+		for 
+	end]]
 	for index=0,object.outputNodeCount() do
 		local node=object.getOutputNodeIds(index)
 		for key,obj in pairs(node) do
