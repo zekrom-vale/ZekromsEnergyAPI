@@ -1,0 +1,13 @@
+{
+	"scripts" : [
+		"/scripts/zekEnergyConsume.API.lua",
+		"objects/consumer/dt.lua"
+	],
+	"scriptDelta":20,
+	"inputNodes":[1,1],
+	"outputNodes":[0,0]
+	"consume":{
+		"config":"dt",
+		"dt":100	//Energy per dt
+	}
+}
