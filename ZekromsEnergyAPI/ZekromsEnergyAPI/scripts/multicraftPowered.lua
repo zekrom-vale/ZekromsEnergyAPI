@@ -48,11 +48,11 @@ function update(dt)
 	if type(storage.overflow)~="table" then
 		local stack=world.containerItems(entity.id())
 		for _,value in pairs(self.recipes) do
-			if self.modeMax==nil or value.mode==nil or value.mode==storage.mode then
+			if storage.energy>=value.power and (self.modeMax==nil or value.mode==nil or value.mode==storage.mode) then
 				if value.shaped then
-					storage.overflow=consumeItemsShaped(value.input, value.output, stack, value.delay)
+					storage.overflow=consumeItemsShaped(value.input, value.output, stack, value.delay, value.power)
 				else
-					storage.overflow=consumeItems(value.input, value.output, stack, value.delay)
+					storage.overflow=consumeItems(value.input, value.output, stack, value.delay, value.power)
 				end
 				if storage.overflow~=false then	goto updateEnd	end
 			end
@@ -64,7 +64,7 @@ function update(dt)
 	end
 end
 
-function consumeItemsShaped(items, prod, stacks, delay)
+function consumeItemsShaped(items, prod, stacks, delay, power)
 	local item2={}
 	for k,item in pairs(items) do
 		local stack=stacks[k+self.input[1]-1]
@@ -84,10 +84,10 @@ function consumeItemsShaped(items, prod, stacks, delay)
 			end
 		end
 	end
-	return tail(items, item2, prod)
+	return tail(items, item2, prod, power)
 end
 
-function consumeItems(items, prod, stack, delay)
+function consumeItems(items, prod, stack, delay, power)
 	local item2={}
 	for _,item in pairs(items) do
 		if true then
@@ -112,10 +112,10 @@ function consumeItems(items, prod, stack, delay)
 		end
 		::skip::
 	end
-	return tail(items, item2, prod)
+	return tail(items, item2, prod, power)
 end
 
-function tail(items, item2, prod)
+function tail(items, item2, prod, power)
 	local function loop(items)
 		for _,item in pairs(items) do
 			if type(item.damage)=="number" then
@@ -128,6 +128,7 @@ function tail(items, item2, prod)
 	loop(items)
 	loop(item2)
 	prod=Zcontainer.treasure(prod)
+	power.consume(power)
 	if delayKey(delay) then
 		return prod
 	end
