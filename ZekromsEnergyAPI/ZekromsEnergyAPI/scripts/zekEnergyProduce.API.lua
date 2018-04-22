@@ -9,8 +9,8 @@ function update(dt)
 	power.update(dt)
 end
 
---Call: `world.callScriptedEntity(entity.id(), "powerOp", <factor>)` when ready
+--Call: `world.callScriptedEntity(entity.id(), "powerProduce", <factor>)` when ready
 --It will return true if it produce all power or false if it failed to store all power
-function powerOp(factor)
-	return power.produce(self.produce.amount, factor)
+function powerProduce(factor)
+	return power.produce(self.produce.amount, factor or 1)
 end

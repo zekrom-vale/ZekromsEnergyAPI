@@ -9,9 +9,7 @@ function power.init()
 	--self.adjacent=config.getParameter("adjacent", false)
 	self.inputRate=config.getParameter("inputRate")
 	self.outputRate=config.getParameter("outputRate")
-	if storage.energy==nil then
-		storage.energy=0
-	end
+	storage.energy=storage.energy or 0
 end
 
 function power.update(dt)
@@ -20,11 +18,19 @@ function power.update(dt)
 end
 
 function power.consume(amount, dt)
+	dt=dt or 1
 	if storage.energy>=amount*dt
 		storage.energy=storage.energy-amount*dt
 		return true
 	end
 	return false
+end
+
+function power.canConsume(amount, dt)
+	if storage.energy>=amount*dt
+		return true, storage.energy-amount*dt
+	end
+	return false, storage.energy
 end
 
 function power.produce(amount, dt)
@@ -34,6 +40,13 @@ function power.produce(amount, dt)
 		return false
 	end
 	return true
+end
+
+function power.canProduce(amount, dt)
+	if storage.energy+amount*dt>self.maxBat then
+		return false, amount*dt+storage.energy-self.maxBat
+	end
+	return true, storage.energy+amount
 end
 
 function power.transferEvalOut(dt)
