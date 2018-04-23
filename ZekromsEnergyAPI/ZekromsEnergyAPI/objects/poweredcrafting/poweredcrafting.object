@@ -1,0 +1,42 @@
+{
+	"objectName":"poweredCrafting",
+	"rarity":"Common",
+	"printable":false,
+	"description":"poweredCrafting Example",
+	"shortdescription":"poweredCrafting",
+	"race":"generic",
+	"category":"crafting",
+	"inventoryIcon":"kazfallsicon.png",
+	"orientations":[{
+		"dualImage":"kazfalls.png:<color>.<frame>",
+		"imagePosition":[-8,0],
+		"frames":5,
+		"animationCycle":1,
+		"spaceScan":0.1,
+		"anchors":["bottom"],
+		"collision":"platform"
+	}],
+	"objectType":"container",
+	"health":1.5,
+	"soundEffect":"/sfx/objects/campfire.ogg",
+	"soundEffectRangeMultiplier":0.5,
+	"statusEffects":[],
+	"scripts":["/scripts/multicraftPowered.lua"],
+	"scriptDelta":25,
+	"multicraftAPI":{
+		"input":[1,2],
+		"output":[3,3],
+		"recipefile":"/objects/kazdra/poweredcrafting/poweredcrafting.config",
+		"drop":"all"
+	},
+	"power":{
+		"inputRate":100,
+		"ioutputRate":100,
+		"maxBat":2000
+	},
+	"openSounds":["/sfx/objects/campfire_use.ogg"],
+	"slotCount":3,
+	"uiConfig":"/objects/kazdra/poweredcrafting/poweredcraftingUI.config",
+	"frameCooldown":5,
+	"autoCloseCooldown":3600
+}
