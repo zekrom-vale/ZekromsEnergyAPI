@@ -6,8 +6,9 @@ function power.init()
 		script.setUpdateDelta(50)
 		self.dt=50
 	end
-	self.inputRate=config.getParameter("inputRate")
-	self.outputRate=config.getParameter("outputRate")
+	self.inputRate=config.getParameter("power.inputRate", 100)
+	self.outputRate=config.getParameter("power.outputRate", 100)
+	self.maxBat=config.getParameter("power.maxBat", 1000)
 	storage.energy=storage.energy or 0
 end
 
@@ -26,6 +27,7 @@ function power.consume(amount, dt)
 end
 
 function power.canConsume(amount, dt)
+	dt=dt or 1
 	if storage.energy>=amount*dt
 		return true, storage.energy-amount*dt
 	end
@@ -33,6 +35,7 @@ function power.canConsume(amount, dt)
 end
 
 function power.produce(amount, dt)
+	dt=dt or 1
 	storage.energy=storage.energy+amount*dt
 	if storage.energy>self.maxBat then
 		storage.energy=self.maxBat
@@ -42,6 +45,7 @@ function power.produce(amount, dt)
 end
 
 function power.canProduce(amount, dt)
+	dt=dt or 1
 	if storage.energy+amount*dt>self.maxBat then
 		return false, amount*dt+storage.energy-self.maxBat
 	end
@@ -73,7 +77,7 @@ function power.transfer(id, amount)
 		return true
 	else
 		storage.energy=storage.energy+val
-		return false
+		return false, val
 	end
 end
 

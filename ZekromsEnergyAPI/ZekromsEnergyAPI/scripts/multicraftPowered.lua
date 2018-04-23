@@ -4,8 +4,8 @@ require "/scripts/ZekromsItemUtil.lua"
 require "/scripts/ZekromsVerify.lua"
 require "/scripts/ZekReceive.lua"
 require "/scripts/zekEnergy.API.lua"
+require "/scripts/zekEnergyConsume.API.lua"
 function init()
-	power.init()
 	storage.clock=storage.clock or 0
 	local array={1, world.containerSize(entity.id())}
 	self=config.getParameter("multicraftAPI")
@@ -24,6 +24,7 @@ function init()
 	if winConfig=="both" then	Zreceive.trigger(); Zreceive.mode()
 	elseif winConfig=="trigger" then	Zreceive.trigger()
 	elseif winConfig=="mode" then	Zreceive.mode()	end
+	power.init()
 end
 
 function update(dt)
