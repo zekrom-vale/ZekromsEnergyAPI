@@ -108,17 +108,26 @@ function generate.fuelBurn(factor)
 end
 
 function generate.fuelList(factor)
+	if storage.fuelListTimer then
+		value.fuelListTimer[1]=value.fuelListTimer[1]-1
+		if value.fuelListTimer[1]==0 then	value.fuelListTimer=nil	end
+		return power.produce(value.fuelListTimer[2])
+	end
 	local stacks=world.containerItems(entity.id())
 	local self=self
 	if self.recipes==nil then
 		self.recipes=root.assetJson(config.getParameter("fuelGen")) or {}
 	end
+	if next(self.recipes)==nil then	return	end
 	for _,stack in pairs(stacks) do
 		for _,recipe in pairs(self.recipes)
 			if stack.name==value.name then
-				if power.canProduce(value.fuel*factor) or self.produce.waste	then
-					return power.produce(value.fuel*factor)
-				else	return	end
+				if power.canProduce(value.fuel*factor) or self.produce.waste then
+					storage.fuelListTimer={value.time-1,value.fuel*factor}
+					return power.produce(value.fuel*factor/value.time)
+				else
+					return
+				end
 			end
 		end
 	end
@@ -135,6 +144,26 @@ function generate.heat(amount)
 		end
 	end
 	if storage.heat then
-		return power.produce(amount)
+		local t=world.timeOfDay()
+		return power.produce(amount*1.3*((-t+1)^(t-1)-.9))
+	end
+end
+
+function generate.life(tick,factor,radius)
+	generate.lifeGet(world.monsterQuery(entity.position(),radius),tick,factor)
+	generate.lifeGet(world.npcQuery(entity.position(),radius),tick,factor)
+end
+
+function generate.lifeGet(arr,tick,factor)
+	for _,a in pairs(arr) do
+		local health=world.callScriptedEntity(a, "status.resource", "health")
+		if health>tick then
+			health=health-tick
+			world.callScriptedEntity(a, "status.setResource", "health", health)
+			return power.produce(tick*factor)
+		else
+			world.callScriptedEntity(a, "status.setResource", "health", 0)
+			return power.produce(tick*health)
+		end
 	end
 end
