@@ -1,0 +1,33 @@
+{
+	"objectName":"Zproducer",
+	"rarity":"Common",
+	"printable":false,
+	"description":"producer Example",
+	"shortdescription":"Zproducer",
+	"race":"generic",
+	"category":"crafting",
+	"inventoryIcon":"Zproducer.png",
+	"orientations":[{
+		"dualImage":"Zproducer.png",
+		"spaceScan":0.1,
+		"anchors":["bottom"],
+		"collision":"platform"
+	}],
+	"objectType":"container",
+	"health":1.5,
+	"soundEffect":"/sfx/objects/campfire.ogg",
+	"soundEffectRangeMultiplier":0.5,
+	"statusEffects":[],
+	"scripts":["/scripts/zekEnergyProduce.API.lua"],
+	"scriptDelta":25,
+	"power":{
+		"inputRate":100,
+		"ioutputRate":100,
+		"maxBat":1000
+	},
+	"openSounds":["/sfx/objects/campfire_use.ogg"],
+	"slotCount":3,
+	"uiConfig":"/objects/kazdra/poweredcrafting/poweredcraftingUI.config",
+	"frameCooldown":5,
+	"autoCloseCooldown":3600
+}
