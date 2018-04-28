@@ -5,7 +5,7 @@ function init()
 	self.powerFactor=config.getParameter("power.factor", 1)
 	self.height=config.getParameter("power.height", {{1,500},{1.3,700},{1.6,900},{2,nil}})
 	storage.light=world.lightLevel(entity.position())
-	storage.lightClock=storage.lightClock or 0
+	storage.lightClock=storage.lightClock or -1
 	world.debugLine(vector, {vector[1], vector[2]+100}, "red")
 end
 
@@ -16,7 +16,7 @@ end
 function generate.lightByTime(factor)
 	storage.lightClock=(storage.lightClock+1)%1000000
 	if storage.lightClock%20000==0 then
-		storage.lightClear=generate.lightVec2(entity.position(), {-25,25,5})
+		storage.lightClear=generate.lightVec2(entity.position(),{-25,25,5})
 		if storage.lightClear then
 			local p=storage.light*1.02327*3^(-3.4626*(2*world.timeOfDay()-1)^2)-0.04327
 			if p<=0 then	return nil	end

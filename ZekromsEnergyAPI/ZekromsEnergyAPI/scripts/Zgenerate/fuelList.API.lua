@@ -1,16 +1,12 @@
+--A more detailed version of fuel.API.lua and requires a config file defining the item power and time
 require "/scripts/zekEnergy.API.lua"
 function init()
 	power.init()
-	self.powerFactor=config.getParameter("power.factor", 1)
-	self.recipes=root.assetJson(config.getParameter("fuelGen")) or {}
+	self.powerFactor=config.getParameter("power.factor",1)--Indicates the factor that applies to all items
+	self.recipes=root.assetJson(config.getParameter("fuelGen")) or {}--Defines the location of the JSON recipes file
 end
 
 function update(dt)
-	generate.fuelList(self.powerFactor)
-end
-
-generate={}
-function generate.fuelList(factor)
 	if next(self.recipes)==nil then	return	end
 	if storage.fuelListTimer then
 		storage.fuelListTimer[1]=storage.fuelListTimer[1]-1
@@ -22,9 +18,9 @@ function generate.fuelList(factor)
 	for _,stack in pairs(stacks) do
 		for _,recipe in pairs(self.recipes)
 			if stack.name==value.name then
-				if power.canProduce(value.fuel*factor) or self.produce.waste then
-					storage.fuelListTimer={value.time-1,value.fuel*factor}
-					return power.produce(value.fuel*factor/value.time)
+				if power.canProduce(value.fuel*self.powerFactor) or self.produce.waste then
+					storage.fuelListTimer={value.time-1,value.fuel*self.powerFactor}
+					return power.produce(value.fuel*self.powerFactor/value.time)
 				else
 					return
 				end

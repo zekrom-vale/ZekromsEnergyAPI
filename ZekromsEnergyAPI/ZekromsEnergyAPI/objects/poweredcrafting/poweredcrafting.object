@@ -31,12 +31,13 @@
 	},
 	"power":{
 		"inputRate":100,
-		"ioutputRate":100,
+		"outputRate":100,
 		"maxBat":2000
 	},
 	"openSounds":["/sfx/objects/campfire_use.ogg"],
 	"slotCount":3,
 	"uiConfig":"/objects/kazdra/poweredcrafting/poweredcraftingUI.config",
 	"frameCooldown":5,
-	"autoCloseCooldown":3600
+	"autoCloseCooldown":3600,
+	"inputNodes":[[-1,-1]]
 }

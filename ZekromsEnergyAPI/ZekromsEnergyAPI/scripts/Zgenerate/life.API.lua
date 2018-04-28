@@ -1,32 +1,35 @@
+--Kills npc and monsters to create power
 require "/scripts/zekEnergy.API.lua"
 function init()
 	power.init()
-	self.powerFactor=config.getParameter("power.factor", 2)
-	self.radius=config.getParameter("power.radius", 8)
-	self.tick=config.getParameter("power.tick", 8)
-	self.kill=config.getParameter("power.kill", true)
+	self.powerFactor=config.getParameter("power.factor",2)--Power per HP
+	self.npcPowerFactor=config.getParameter("power.npcPowerFactor",false)--Hurt NPCs?
+	self.radius=config.getParameter("power.radius",8)--AOE
+	self.tick=config.getParameter("power.tick",8)--Amount of HP to consume per dt
+	self.kill=config.getParameter("power.kill",true)--Kill entities
 end
 
 function update(dt)
-	generate.life(self.tick,self.powerFactor,self.radius)
-end
-
-generate={}
-function generate.life(tick,factor,radius)
-	generate.lifeGet(world.monsterQuery(entity.position(),radius),tick,factor)
-	generate.lifeGet(world.npcQuery(entity.position(),radius),tick,factor)
+	local self=self
+	local poz=entity.position()
+	generate.lifeGet(world.monsterQuery(poz,self.radius),self.tick,self.powerFactor)
+	if self.npcPowerFactor~=false then
+		generate.lifeGet(world.npcQuery(poz,self.radius),self.tick,self.npcPowerFactor)
+	end
 end
 
 function generate.lifeGet(arr,tick,factor)
 	for _,a in pairs(arr) do
-		local health=world.callScriptedEntity(a, "status.resource", "health")
+		local health=world.callScriptedEntity(a,"status.resource","health")
 		if health>tick then
 			health=health-tick
-			world.callScriptedEntity(a, "status.setResource", "health", health)
-			return power.produce(tick*factor)
+			local _,consume=power.produce(tick*factor)
+			world.callScriptedEntity(a,"status.setResource","health",consume/factor)
+			return nil,consume
 		elseif self.kill then
-			world.callScriptedEntity(a, "status.setResource", "health", 0)
-			return power.produce(tick*health)
+			local _,consume=power.produce(health*factor)
+			world.callScriptedEntity(a,"status.setResource","health",consume/factor)
+			return nil,consume
 		end
 	end
 end
