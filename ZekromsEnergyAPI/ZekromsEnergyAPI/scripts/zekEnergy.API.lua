@@ -1,11 +1,11 @@
 power={}
 function power.init()
-	local function dtFix()--Forces a scriptDelta
+	self.dt=script.updateDt()
+	if self.dt==0 then
 		sb.logWarn("Object missing scriptDelta")
-		script.setUpdateDelta(50)--May not _work_
-		return 50
+		script.setUpdateDelta(60)
+		self.dt==60
 	end
-	self.dt=config.getParameter("scriptDelta",dtFix())
 	self.inputRate=config.getParameter("power.inputRate",100)--Defines the input rate per dt
 	self.outputRate=config.getParameter("power.outputRate",100)--Defines the output rate per dt (Not used)
 	self.maxBat=config.getParameter("power.maxBat",1000)--Max battery storage
@@ -153,6 +153,10 @@ function power.item.enervate(amount,range)--Discharges items from range[1] to ra
 		::enervateEnd::
 	end
 end
+
+--[[function power.item.use(amount)
+	--HOW!?
+end]]
 
 function power.consumeAll(amount,dt)--Consumes requested power or all of it.  Returns the underflow (positive) or 0,success
 	dt=dt or 1
