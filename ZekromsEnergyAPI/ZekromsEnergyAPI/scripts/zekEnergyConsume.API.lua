@@ -1,4 +1,5 @@
 require "/scripts/zekEnergy.API.lua"
+--DO NOT USE THIS!
 consume={}
 function consume.init()
 	self.consume=config.getParameter("consume")

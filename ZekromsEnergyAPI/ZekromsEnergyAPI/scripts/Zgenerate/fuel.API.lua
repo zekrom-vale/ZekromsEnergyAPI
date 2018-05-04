@@ -13,13 +13,13 @@ function update(dt)
 	if storage.fuelListTimer then
 		storage.fuelListTimer[1]=storage.fuelListTimer[1]-1
 		if storage.fuelListTimer[1]==0 then	storage.fuelListTimer=nil	end
-		return power.produce(storage.fuelListTimer[2])
+		return power.produce(storage.fuelListTimer[2],self.powerFactor)
 	end
-	for _,stack in pairs(world.containerItems(entity.id())) do
+	for _,stack in pairs(world.containerItems(entity.id()))do
 		local fuel=root.itemConfig(stack).config[self.type]
-		if type(fuel)=="number" and(power.canProduce(fuel*self.powerFactor) or self.produce.waste)then
-			storage.fuelListTimer={storage.time,fuel*self.powerFactor/storage.time}
-			return power.produce(fuel*self.powerFactor/storage.time)
+		if type(fuel)=="number"and(power.canProduce(fuel*self.powerFactor)or self.produce.waste)then
+			storage.fuelListTimer={storage.time,fuel/storage.time}
+			return power.produce(fuel/storage.time,self.powerFactor)
 		end
 	end
 end

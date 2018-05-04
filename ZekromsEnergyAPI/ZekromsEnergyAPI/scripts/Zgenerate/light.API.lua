@@ -45,8 +45,8 @@ end
 
 function generate.lightVec2(vec,arr,max)
 	max=max or 100
-	for value=arr[1],arr[2],arr[3] or 1 do
-		if world.lineTileCollision(vec, {vec[1]+value, vec[2]+max}) then	return true	end
+	for value=table.unpack(arr)do
+		if world.lineTileCollision(vec,{vec[1]+value,vec[2]+max}) then	return true	end
 	end
 	return false
 end

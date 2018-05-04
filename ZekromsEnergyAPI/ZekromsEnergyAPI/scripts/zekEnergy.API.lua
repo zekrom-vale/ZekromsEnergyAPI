@@ -1,24 +1,24 @@
 power={}
 function power.init()
-	self.dt=script.updateDt()
-	if self.dt==0 then
+	self.dt=script.updateDt()/60
+	if not self.dt or self.dt==0 then
 		sb.logWarn("Object missing scriptDelta")
 		script.setUpdateDelta(60)
-		self.dt==60
+		self.dt=1
 	end
 	self.inputRate=config.getParameter("power.inputRate",100)--Defines the input rate per dt
-	self.outputRate=config.getParameter("power.outputRate",100)--Defines the output rate per dt (Not used)
+	self.outputRate=config.getParameter("power.outputRate",100)--Defines the output rate per dt(Not used)
 	self.maxBat=config.getParameter("power.maxBat",1000)--Max battery storage
 	storage.energy=storage.energy or 0
 end
 
 function power.update(dt)
-	--power.transfer.evalOut(dt)
-	power.transfer.evalIn(dt)
+	--power.transfer.evalOut(self.dt)
+	return power.transfer.evalIn(self.dt)
 end
 
 function power.consume(amount,dt)--Consumes power if not, it returns false,energy
-	amount=amount*(dt or 1)
+	amount=amount*(dt or self.dt)
 	if storage.energy>=amount then
 		storage.energy=storage.energy-amount
 		return true
@@ -27,7 +27,7 @@ function power.consume(amount,dt)--Consumes power if not, it returns false,energ
 end
 
 function power.canConsume(amount,dt)--Checks if the object has enough power to consume if not, it returns false,energy
-	amount=amount*(dt or 1)
+	amount=amount*(dt or self.dt)
 	if storage.energy>=amount then
 		return true,storage.energy-amount
 	end
@@ -35,7 +35,7 @@ function power.canConsume(amount,dt)--Checks if the object has enough power to c
 end
 
 function power.produce(amount,dt)--Produces power of a given amount.  Returns true if successful and false,overflow if not.
-	storage.energy=storage.energy+amount*(dt or 1)
+	storage.energy=storage.energy+amount*(dt or self.dt)
 	if storage.energy>self.maxBat then
 		local overflow=storage.energy-self.maxBat
 		storage.energy=self.maxBat
@@ -45,7 +45,7 @@ function power.produce(amount,dt)--Produces power of a given amount.  Returns tr
 end
 
 function power.canProduce(amount,dt)--Determines if the object has enough space to produce
-	local total=amount*(dt or 1)+storage.energy
+	local total=amount*(dt or self.dt)+storage.energy
 	if total>self.maxBat then
 		return false,total-self.maxBat
 	end
@@ -57,7 +57,7 @@ power.transfer={}
 function power.transfer.evalOut(dt)--Transfers power out
 	for index=1,object.outputNodeCount()do
 		local node=object.getOutputNodeIds(index)
-		for key,obj in pairs(node)do
+		for _,obj in pairs(node)do
 			power.transfer.core(obj.id,self.outputRate*dt)
 		end
 	end
@@ -66,7 +66,7 @@ end
 function power.transfer.evalIn(dt)--Transfers power in
 	for index=1,object.inputNodeCount()do
 		local node=object.getInputNodeIds(index)
-		for key,obj in pairs(node)do
+		for _,obj in pairs(node)do
 			power.transfer.core(obj.id,-self.inputRate*dt)
 		end
 	end
@@ -84,15 +84,15 @@ function power.transfer.core(id,amount)--Tries to transfer power between objects
 end
 
 function power.transfer.Receive(amount)--Receives the transfer call
-	local storage=storage
+	local storage,energy=storage
 	storage.energy=storage.energy+amount
 	if storage.energy<0 then
 		--Underflow	Amount is negative/Consume
-		local energy=storage.energy
+		energy=storage.energy
 		storage.energy=0
 	elseif storage.energy>self.maxBat then
 		--Overflow	Amount is positive/Send
-		local energy=self.maxBat-storage.energy
+		energy=self.maxBat-storage.energy
 		storage.energy=self.maxBat
 	else
 		return 0
@@ -101,16 +101,17 @@ function power.transfer.Receive(amount)--Receives the transfer call
 end
 
 power.item={}
-function power.item.charge(amount,range)--Charges items from range[1] to range[2]
+function power.item.charge(amount,range,dt)--Charges items from range[1] to range[2]
+	amount=amount*(dt or self.dt)
 	local id=entity.id()
-	range=range or {1,world.containerSize(id)}
+	range=range or{1,world.containerSize(id)}
 	stacks=world.containerItems(id)
 	for key=range[1],range[2]do
 		local stack=stacks[key]
 		local maxBat=root.itemConfig(stack).config.maxBat
-		if type(maxBat)~="number" then
+		if type(maxBat)~="number"then
 			goto chargeEnd
-		elseif stack.parameters==nil or stack.parameters.power==nil then
+		elseif not(stack.parameters and stack.parameters.power)then
 			stack.parameters={power=0,durabilityHit=maxBat}
 		end
 		local pow=stack.parameters.power+amount/stack.count
@@ -125,13 +126,14 @@ function power.item.charge(amount,range)--Charges items from range[1] to range[2
 	end
 end
 
-function power.item.enervate(amount,range)--Discharges items from range[1] to range[2]
+function power.item.enervate(amount,range,dt)--Discharges items from range[1] to range[2]
+	amount=amount*(dt or self.dt)
 	local id=entity.id()
-	range=range or {1,world.containerSize(id)}
+	range=range or{1,world.containerSize(id)}
 	stacks=world.containerItems(id)
 	for key=range[1],range[2]do
 		local stack=stacks[key]
-		if stack.parameters==nil or stack.parameters.power==nil then
+		if not(stack.parameters and stack.parameters.power)then
 			goto enervateEnd
 		end
 		local pow=stack.parameters.power-amount/stack.count
@@ -159,7 +161,7 @@ end
 end]]
 
 function power.consumeAll(amount,dt)--Consumes requested power or all of it.  Returns the underflow (positive) or 0,success
-	dt=dt or 1
+	dt=dt or self.dt
 	local storage=storage
 	storage.energy=storage.energy-amount*dt
 	if storage.energy<0 then
@@ -182,7 +184,7 @@ function power.item.valid(item)--Returns if the item is a valid power item
 end
 
 function power.item.charge(item)--Returns the charge of the item, nil if parameters is nil and false if parameters.power is nil
-	if item.parameters==nil then
+	if not item.parameters then
 		return
 	end
 	return item.parameters.power or false
